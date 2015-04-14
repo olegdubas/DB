@@ -23,7 +23,7 @@ foreach($users as $user) echo $user->name , '<br>';
 
 ```
 
-## Connection managing
+## Connection manager
 
 - `DB::open()` - open a MySQL connection immediately
 - `DB::create()` - just another alias of `DB::open()`
@@ -57,7 +57,6 @@ DB::open(':unbuffered', 'db_host', 'db_username', 'db_password', 'db_basename');
 DB::open('second_database:unbuffered', 'db_host', 'db_username', 'db_password', 'db_basename');
 ```
 
-
 ### DB::predict()
 
 `DB::predict()` is identical to `DB::open()`, except the fact that the connection isn't opened immediately, but it kept in "connections dictionary", and will be opened on the time of first usage. This helps to save resources, yet have all settings in one place.
@@ -74,9 +73,47 @@ DB::query('second', "SELECT * FROM `books`");
 // Now, 'second' is open too
 ```
 
+## Query functions
 
+Class DB has a set of query methods, all accepting SQL query as a parameter. No matter what type of result they return, all this methods have same parameters structure, explained below.
 
+- `DB::query()` - main query function, returns statement object
+- `DB::insert()` - analogue of `DB::query()`, but returns the last insert ID (similar to `PDO::lastInsertId`)
+- `DB::result()` - returns one single value
+- `DB::object()` - (alias: `DB::obj()`) returns one single row in form of an object
+- `DB::assoc()` - returns one single row in form of an associative array
+- `DB::row()` - returns one single row in form of a non-associative array
+- `DB::all_objects()` - (aliases: `DB::all_object()`, `DB::all_obj()`) returns an array of records in form of objects
+- `DB::all_assocs()` - (alias: `DB::all_assoc()`) returns an array of records in form of associative arrays
+- `DB::all_rows()` - (alias: `DB::all_row()`) returns an array of records in form of non-associative arrays
+- `DB::objects()` - returns an iterator object can be used in `foreach` loop over records as objects
+- `DB::assocs()` - returns an iterator object can be used in `foreach` loop over records as associative arrays
+- `DB::rows()` - returns an iterator object can be used in `foreach` loop over records as non-associative arrays
 
+All this methods can be called with just one parameter — SQL query. Example:
+
+```
+DB::query("DELETE FROM `cars`");
+```
+
+All this methods can accept an additional parameter **before** the SQL query, specifying the database connection name:
+
+```
+echo DB::result('database2', "SELECT COUNT(*) FORM `cars`");
+```
+You can also add an optional `:unbuffered` flag to the connection name, and this particular query will be run in a separate, unbuffered connection, which matches the following behavior: `$pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);`. It doesn't matter if the connection was open with the `:unbuffered` flag or not, specifying this flag in a query will open a separate connection, if needed.
+
+Example:
+```
+DB::query('database2:unbuffered', "UPDATE `cars` SET `expired` = 0");
+```
+
+All this methods can accept an additional parameter **after** the SQL query, specifying the array of parameters binding. The class methods support two ways of parameters binding: using `?` and naming parameters specifically like `:name`:
+
+```
+DB::query("UPDATE `users` SET `name` = ? WHERE `id` = ?", [$name, $id] );
+DB::query("UPDATE `users` SET `name` = :name WHERE `id` = :id", ['name' => $name, 'id' => $id] );
+```
 
 ## Misc functions 
-- **DB::escape()** - escape characters (addslashes / mysql_real_escape_string analogue)
+- `DB::escape()` - (alias: `DB::real_escape_string()`) escape characters (addslashes / mysql_real_escape_string analogue)
