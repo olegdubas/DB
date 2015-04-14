@@ -25,12 +25,12 @@ foreach($users as $user) echo $user->name , '<br>';
 
 ## Connection managing
 
-- **DB::open()** - open a MySQL connection immediately
-- **DB::create()** - just another alias of DB::open
-- **DB::predict()** - predict a MySQL connection. It won't be open if not ever used, and it will open it on the first use.
-- **DB::is_open()** - see, if a conection is currently open
-- **DB::is_predicted()** - see, if a connection is predicted (no matter, is it open now or not)
-- **DB::close()** - close a MySQL connection
+- `DB::open()` - open a MySQL connection immediately
+- `DB::create()` - just another alias of `DB::open()`
+- `DB::predict()` - predict a MySQL connection. It won't be open if not ever used, and it will open it on the first use.
+- `DB::is_open()` - see, if a conection is currently open
+- `DB::is_predicted()` - see, if a connection is predicted (no matter, is it open now or not)
+- `DB::close()` - close a MySQL connection
 
 ### DB::open()
 
@@ -60,7 +60,14 @@ DB::open('second_database:unbuffered', 'db_host', 'db_username', 'db_password', 
 
 ### DB::predict()
 
-DB::predict() is identical to DB::open(), 
+`DB::predict()` is identical to `DB::open()`, except the fact that the connection isn't opened immediately, but it kept in "connections dictionary", and will be opened on the time of first usage. This helps to save resources, yet have all settings in one place.
+
+For example, you are not sure if you'll be using the second database yet. Say, you have one single `index.php` which initializes everything. You can open the default database connection and predict the second one. Then, if some modules will try to query the second database, it will be immediately opened before the first request.
+
+
+
+
+
 
 ## Misc functions 
 - **DB::escape()** - escape characters (addslashes / mysql_real_escape_string analogue)
