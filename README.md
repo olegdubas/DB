@@ -6,6 +6,23 @@ Useful database class based on PDO MySQL connection
 
 - This class can handle multiple database connections. Each database connection gets it's own identifier. When you open a connection, you can specify the ID, and you will have to use it every time you want to run a query on that connection. The default database connection ID is '**default**'
 
+## Quick examples
+
+The DB class is capable of much, much more than this, but here are a few examples of some easy routine tasks:
+
+```
+DB::open('localhost', 'root', '12345', 'database');
+
+DB::query('UPDATE `users` SET `last_login` = NOW()');
+DB::query('DELETE FROM `user_login_attempts`');
+
+$exists = DB::result("SELECT COUNT(*) FROM `users` WHERE `name` = 'Alex'");
+echo $exists;
+
+$users = DB::objects('SELECT `name` FROM `users`');
+foreach($users as $user) echo $user->name; 
+
+```
 
 ## Connection managing
 
