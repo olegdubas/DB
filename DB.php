@@ -9,27 +9,15 @@ class DB
     static public  $affected_rows   = null;
 
 
-    static private function debug($s)
-    {
-        return;
-        //if(!in_array($_SERVER['REMOTE_ADDR'], ['71.170.249.249'])) return;
-        //echo '<pre>'.print_r($s, 1).'</pre><br>';
-    }
-
-
     // open a PDO connection and add it to the $connections[$name]
     static private function add_connection ($name, $db_host, $db_user, $db_pass, $db_base, $unbuffered = false)
     {
-        // self::debug('Adding: '.$name);
-        // self::debug(["db_host" => $db_host, "db_user" => $db_user, "db_pass" => $db_pass, "db_base" => $db_base]);
-
         // first, let's check if there's no connection like this open Already
         if(!$unbuffered) { // don't check unbuffered connections for duplicates
             foreach(self::$connections as $c_name => $c)
             {
                 if($c['info'] == ["db_host" => $db_host, "db_user" => $db_user, "db_pass" => $db_pass, "db_base" => $db_base] ) // the arrays match!
                 {
-                    self::debug('Already exists: '.$c_name);
                     // there Already IS a connection open with exactly same credentials
                     if($c_name == $name) return self::$connections[$name]['connection']; // wow! this is exactly same connection that was requested! nothing to do, exiting
                     self::$connections[$name] = self::$connections[$c_name]; // copy the connection, no need to open a new one
@@ -40,14 +28,11 @@ class DB
 
         $con_info = ['db_host' => $db_host, 'db_user' => $db_user, 'db_pass' => $db_pass, 'db_base' => $db_base];
 
-        self::debug('Opening database name: '.$name.($unbuffered?', unbuffered':''));
-
         $options = [
             PDO::ATTR_TIMEOUT => 10,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         ];
         if($unbuffered) {
-            self::debug('Making the connection unbuffered');
             $options[ PDO::MYSQL_ATTR_USE_BUFFERED_QUERY ] = false;
         }
 
@@ -75,12 +60,10 @@ class DB
     static private function add_predicted($name)
     {
         if(self::is_open($name)) {
-            self::debug('add_predicted: connection already open');
             return;
         } // the connection is open already
         if(!self::is_predicted($name)) throw new DBException("DB class: trying to open a predicted connection '".$name."' which is not predicted!");
         $c = self::$predicted_connections[$name];
-        self::debug('add_predicted: opening connection '.$name);
         self::add_connection($name, $c['db_host'], $c['db_user'], $c['db_pass'], $c['db_base']);
     }
 
@@ -93,10 +76,8 @@ class DB
     {
         if(!self::is_open($name))
         {
-            self::debug('Can\'t create an unbuffered connection: it has to be connected or predicted!');
             throw new DBException("DB class error: Can't created an unbuffered connection: it has to be connected or predicted!");
         }
-        self::debug('Creating unbuffered clone of: '.$name);
         $c = self::$connections[$name]['info'];
         return self::add_connection($name, $c['db_host'], $c['db_user'], $c['db_pass'], $c['db_base'], true);
     }
@@ -156,7 +137,6 @@ class DB
 
     static private function do_the_query($arg1, $arg2 = null, $arg3 = null)
     {
-        self::debug([$arg1, $arg2, $arg3]);
         self::open_default(); // just for sure
 
         if(!isset($arg1))                       throw new DBException("DB class error: empty query!");
@@ -178,11 +158,8 @@ class DB
         $database_name = str_replace(':unbuffered', '', $database_name);
         if($database_name == '') $database_name = 'default';
 
-        self::debug('Queried database: '.$database_name. ($unbuffered ? ', unbuffered':''));
-
         if (!self::is_open($database_name) && !self::is_predicted($database_name)) throw new DBException("Trying to query DB connection '{$database_name}' which does not exist and has not been predicted!");
         if (!self::is_open($database_name) && self::is_predicted($database_name)) {
-            self::debug('It was predicted: ' . $database_name);
             self::add_predicted($database_name);
             if(!self::is_open($database_name)) throw new DBException("Can't open a predicted '{$database_name}'!");
         }
