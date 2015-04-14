@@ -33,6 +33,18 @@ It means, the first example is totally identical to the following:
 
 `DB::open('default', 'db_host', 'db_username', 'db_password', 'db_basename');`
 
+You can also specify `:unbuffered` flag to a connection name, and it will be opened w/o buffering, which matches the following behavior: `$pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);`:
+
+Example:
+```
+DB::open(':unbuffered', 'db_host', 'db_username', 'db_password', 'db_basename'); // opens 'default', unbuffered
+DB::open('second_database:unbuffered', 'db_host', 'db_username', 'db_password', 'db_basename');
+```
+
+
+### DB::predict()
+
+DB::predict() is identical to DB::open(), 
 
 ## Misc functions 
 - **DB::escape()** - escape characters (addslashes / mysql_real_escape_string analogue)
