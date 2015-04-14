@@ -64,6 +64,15 @@ DB::open('second_database:unbuffered', 'db_host', 'db_username', 'db_password', 
 
 For example, you are not sure if you'll be using the second database yet. Say, you have one single `index.php` which initializes everything. You can open the default database connection and predict the second one. Then, if some modules will try to query the second database, it will be immediately opened before the first request.
 
+```
+DB::open('default', 'db_host', 'db_username', 'db_password', 'db_basename');
+DB::predict('second', 'db_host2', 'db_username2', 'db_password2', 'db_basename2');
+// 'default' is open now. 'second' is not
+DB::query("SELECT * FROM `users`");
+// Still, 'default' is open now. 'second' is not
+DB::query('second', "SELECT * FROM `books`");
+// Now, 'second' is open too
+```
 
 
 
