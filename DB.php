@@ -426,8 +426,3 @@ class DBException extends Exception
     }
 }
 
-
-
-if(!function_exists('SQLPrep')){
-    function SQLPrep($s){ return DB::escape($s); }
-}
