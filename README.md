@@ -16,11 +16,10 @@ DB::open('localhost', 'root', '12345', 'database');
 DB::query('UPDATE `users` SET `last_login` = NOW()');
 DB::query('DELETE FROM `user_login_attempts`');
 
-$exists = DB::result("SELECT COUNT(*) FROM `users` WHERE `name` = 'Alex'");
-echo $exists;
+echo 'Age: ', DB::result("SELECT `age` FROM `users` WHERE `name` = 'Alex'"); 
 
 $users = DB::objects('SELECT `name` FROM `users`');
-foreach($users as $user) echo $user->name; 
+foreach($users as $user) echo $user->name , '<br>'; 
 
 ```
 
